@@ -6,4 +6,4 @@ var anonFunc = function (x,y) {
   return x - y;
 }
 
-function arrowFunc (one, two) => one * two;
+var arrowFunc = (one, two) => one * two;

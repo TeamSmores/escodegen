@@ -6,7 +6,7 @@ var code = fs.readFileSync('code.js');
 
 var ast = esprima.parse(code);
 
-console.log(ast);
+// console.log(JSON.stringify(ast.body[1]));
 
 var output = es6codegen.generate(ast);
 

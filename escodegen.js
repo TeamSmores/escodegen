@@ -863,11 +863,12 @@
     };
 
     function generateIdentifier(node) {
+      // console.log('id',toSourceNodeWhenNeeded(node.name, node));
         return toSourceNodeWhenNeeded(node.name, node);
     }
 
     function generateAsyncPrefix(node, spaceRequired) {
-        return node.async ? 'async' + (spaceRequired ? noEmptySpace() : space) : '';
+        return node.async ? 'async' + (spaceRequired ? noEmptySpace() : space) : 'isAnon'; //WADE
     }
 
     function generateStarSuffix(node) {
@@ -936,8 +937,12 @@
 
     CodeGenerator.prototype.generateFunctionBody = function (node) {
         var result, expr;
+        console.log(node);
+        // if (node.id === null) console.log('yay!');
 
         result = this.generateFunctionParams(node);
+        // console.log(result);
+        if (node.id === null && node.type !== 'ArrowFunctionExpression') result.push( ' =>');
 
         if (node.type === Syntax.ArrowFunctionExpression) {
             result.push(space);
@@ -2035,7 +2040,7 @@
         FunctionExpression: function (expr, precedence, flags) {
             var result = [
                 generateAsyncPrefix(expr, true),
-                'function'
+                ' ' //for arrow functions WADE
             ];
             if (expr.id) {
                 result.push(generateStarSuffix(expr) || noEmptySpace());
