@@ -1,7 +1,7 @@
 {
-    "name": "escodegen",
+    "name": "es6codegen",
     "description": "ECMAScript code generator",
-    "homepage": "http://github.com/estools/escodegen",
+    "homepage": "https://github.com/TeamSmores/escodegen",
     "main": "escodegen.js",
     "bin": {
         "esgenerate": "./bin/esgenerate.js",
@@ -21,14 +21,14 @@
     },
     "maintainers": [
         {
-            "name": "Yusuke Suzuki",
-            "email": "utatane.tea@gmail.com",
-            "web": "http://github.com/Constellation"
+            "name": "Team Smores",
+            "email": "wade@wadearmstrong.com",
+            "web": "https://github.com/TeamSmores"
         }
     ],
     "repository": {
         "type": "git",
-        "url": "http://github.com/estools/escodegen.git"
+        "url": "https://github.com/TeamSmores/escodegen"
     },
     "dependencies": {
         "estraverse": "^1.9.1",
