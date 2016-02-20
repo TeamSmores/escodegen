@@ -2517,6 +2517,8 @@
           var olregex = /(.*)\s*=\s*(\(.*\))\s*=>\s*\{,\s*return\s*(.*);,\}/ig;
           var newfragment = fragment.replace(olregex, '$1 = $2 => $3');
           console.log('replaced', newfragment);
+          var nestedregex = /(.*)\{,\s*return\s*(.*);,\}(.*)/ig;
+          newfragment = newfragment.replace(nestedregex, '$1$2$3');
           result = fragment = newfragment;
           // result = 'anon2 = (z, w) => return z + w';
         }

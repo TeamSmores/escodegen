@@ -21,4 +21,11 @@ for (var i = 0; i > 10; i++) {
   console.log(i);
 }
 
+var evens = odds.map(function (v) { return v+1 });
+
+nums.forEach(v => {
+  if (v % 5 === 0)
+    fives.push(v);
+});
+
 var arrowFunc = (one, two) => one * two;
