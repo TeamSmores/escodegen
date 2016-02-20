@@ -11,14 +11,14 @@ var anon2 = function(z,w)
     return z + w;
   }
 
-// var multiLineAnonFunc = function (many, more) {
-//   var foo = many;
-//   var bar = more;
-//   return foo || bar;
-// }
+var multiLineAnonFunc = function (many, more) {
+  var foo = many;
+  var bar = more;
+  return foo || bar;
+}
 
-// for (var i = 0; i > 10; i++) {
-//   console.log(i);
-// }
+for (var i = 0; i > 10; i++) {
+  console.log(i);
+}
 
-// var arrowFunc = (one, two) => one * two;
+var arrowFunc = (one, two) => one * two;
