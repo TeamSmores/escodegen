@@ -1638,6 +1638,19 @@
             var result, that = this;
             withIndent(function () {
                 result = ['for' + space + '('];
+                // start new stuff
+                if (stmt.init && stmt.test && stmt.update.operator) {
+                  result.push(stmt.init.kind + noEmptySpace() + 'value' + noEmptySpace());
+                  result = join(result, 'of');
+                  result = [join(
+                      result,
+                      that.generateExpression(stmt.test.right.object, Precedence.Sequence, E_TTT)
+                  ), ')'];
+                  stmt.body.body[0].expression.arguments[0].property.name = 'value';
+                  return result;
+                }
+                //end new stuff
+                // console.log('BODY: ', stmt.body.body[0].expression.arguments[0].property.name);
                 if (stmt.init) {
                     if (stmt.init.type === Syntax.VariableDeclaration) {
                         result.push(that.generateStatement(stmt.init, S_FFFF));
