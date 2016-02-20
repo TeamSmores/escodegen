@@ -828,7 +828,9 @@
 
     // Helpers.
 
-    CodeGenerator.prototype.maybeBlock = function(stmt, flags) {
+    CodeGenerator.prototype.maybeBlock = function(stmt, flags, isoneliner) {
+      console.log(stmt, flags, isoneliner);
+      if (isoneliner) console.log(stmt.body[0].argument);
         var result, noLeadingComment, that = this;
 
         noLeadingComment = !extra.comment || !stmt.leadingComments;
@@ -868,7 +870,7 @@
     }
 
     function generateAsyncPrefix(node, spaceRequired) {
-        return node.async ? 'async' + (spaceRequired ? noEmptySpace() : space) : 'isAnon'; //WADE
+        return node.async ? 'async' + (spaceRequired ? noEmptySpace() : space) : ''; //WADE
     }
 
     function generateStarSuffix(node) {
@@ -937,12 +939,18 @@
 
     CodeGenerator.prototype.generateFunctionBody = function (node) {
         var result, expr;
-        console.log(node);
+        var oneliner = false;
+        // console.log(node);
         // if (node.id === null) console.log('yay!');
 
         result = this.generateFunctionParams(node);
         // console.log(result);
         if (node.id === null && node.type !== 'ArrowFunctionExpression') result.push( ' =>');
+        // if (node.id === null && node.type !== 'ArrowFunctionExpression') console.log(JSON.stringify(node.body) + '\n');
+        // if (node.id === null && node.type !== 'ArrowFunctionExpression') console.log(JSON.stringify(node.body.body[0].type) + '\n');
+        if (node.id === null
+            && node.type !== 'ArrowFunctionExpression'
+            && node.body.body[0].type === 'ReturnStatement') oneliner = true;
 
         if (node.type === Syntax.ArrowFunctionExpression) {
             result.push(space);
@@ -951,13 +959,14 @@
 
         if (node.expression) {
             result.push(space);
-            expr = this.generateExpression(node.body, Precedence.Assignment, E_TTT);
+            expr = this.generateExpression(node.body, Precedence.Assignment, E_TTT, oneliner);
             if (expr.toString().charAt(0) === '{') {
                 expr = ['(', expr, ')'];
             }
             result.push(expr);
         } else {
-            result.push(this.maybeBlock(node.body, S_TTFF));
+          // if (oneliner) console.log('maybeBlock');
+            result.push(this.maybeBlock(node.body, S_TTFF, oneliner));
         }
 
         return result;
@@ -2464,9 +2473,11 @@
 
     CodeGenerator.prototype.generateStatement = function (stmt, flags) {
         var result,
-            fragment;
+            fragment,
+            oneliner = false;
 
         result = this[stmt.type](stmt, flags);
+        // console.log('result', result);
 
         // Attach comments
 
@@ -2474,10 +2485,47 @@
             result = addComments(stmt, result);
         }
 
-        fragment = toSourceNodeWhenNeeded(result).toString();
+        // WADE
+        // TODO -- Delete
+        // console.log('result', result);
+        // console.log('2 -- ', result[2]);
+        // let newlines = (result[2] && (result[2].constructor === String)) ? (result[2].match(/\n/g) ? result[2].match(/\n/g).length : 0) : 'array';
+        // console.log('newlines', newlines);
+        // if (newlines < 3) result.push('one-liner');
+        // if (result[2] && (result[2].indexOf('return') > -1)) result.push('one-liner');
+
+        fragment = toSourceNodeWhenNeeded(result);
+
+        // WADE
+        // TODO - Delete
+        // console.log('fragment',fragment);
+        fragment = fragment.split('\n');
+        // console.log('fragment-arr', fragment)
+        if (fragment[0] && (fragment[0].indexOf('=>') > -1)) {
+          if (fragment[2] && (fragment[2].indexOf('}') > -1)) {
+            if (fragment[1] && (fragment[1].indexOf('return') > -1)) oneliner = true;
+          }
+        }
+        // if (fragment[0].indexOf('return') > -1) console.log('one-liner!');
+
+        console.log(oneliner);
+
+        fragment = fragment.toString();
+        if (oneliner) {
+          console.log('in replacing');
+          console.log('fragment', fragment);
+          var olregex = /var\s*(.*)\s*=\s*(\(.*?\))\s*=>\s*(\{,)\s*return\s*(.+)(,\});/ig;
+          var newfragment = fragment.replace(olregex, 'var $1 = $2 => $4');
+          console.log('replaced', newfragment);
+          result = fragment = newfragment;
+          result = 'anon2 = (z, w) => return z + w';
+        }
         if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
             result = sourceMap ? toSourceNodeWhenNeeded(result).replaceRight(/\s+$/, '') : fragment.replace(/\s+$/, '');
         }
+
+        console.log('result',result);
+
 
         return toSourceNodeWhenNeeded(result, stmt);
     };
