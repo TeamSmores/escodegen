@@ -1653,18 +1653,32 @@
             withIndent(function () {
                 result = ['for' + space + '('];
                 // start new stuff
-                if (stmt.init && stmt.test && stmt.update.operator) {
-                  result.push(stmt.init.kind + noEmptySpace() + 'value' + noEmptySpace());
+                var testValue;
+                if (stmt.test.right.object) {
+                  testValue = stmt.test.right.object.name.length;
+                }
+                if (stmt.test.right.value) {
+                  testValue = stmt.test.right.value;
+                }
+                var bodyValue;
+                function checkBody(value) {
+                  if (value.expression) {
+                    return bodyValue = value.expression;
+                  }
+                  return checkBody(value.body.body[0]);
+                }
+                checkBody(stmt.body.body[0]);
+                if (stmt.init.declarations[0].init.value === 0 && bodyValue.arguments[0].object.name.length === testValue && stmt.update.operator === '++') {
+                  result.push(stmt.init.kind + noEmptySpace() + stmt.init.declarations[0].id.name + noEmptySpace());
                   result = join(result, 'of');
-                  result = [join(
+                    result = [join(
                       result,
-                      that.generateExpression(stmt.test.right.object, Precedence.Sequence, E_TTT)
-                  ), ')'];
-                  stmt.body.body[0].expression.arguments[0].property.name = 'value';
+                      that.generateExpression(bodyValue.arguments[0].object, Precedence.Sequence, E_TTT)
+                    ), ')'];
                   return result;
                 }
                 //end new stuff
-                // console.log('BODY: ', stmt.body.body[0].expression.arguments[0].property.name);
+                // console.log('TEST: ', stmt.test.right.);
                 if (stmt.init) {
                     if (stmt.init.type === Syntax.VariableDeclaration) {
                         result.push(that.generateStatement(stmt.init, S_FFFF));
