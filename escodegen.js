@@ -829,8 +829,8 @@
     // Helpers.
 
     CodeGenerator.prototype.maybeBlock = function(stmt, flags, isoneliner) {
-      console.log(stmt, flags, isoneliner);
-      if (isoneliner) console.log(stmt.body[0].argument);
+      // console.log(stmt, flags, isoneliner);
+      // if (isoneliner) console.log(stmt.body[0].argument);
         var result, noLeadingComment, that = this;
 
         noLeadingComment = !extra.comment || !stmt.leadingComments;
@@ -2508,23 +2508,23 @@
         }
         // if (fragment[0].indexOf('return') > -1) console.log('one-liner!');
 
-        console.log(oneliner);
+        // console.log(oneliner);
 
         fragment = fragment.toString();
         if (oneliner) {
-          console.log('in replacing');
+          // console.log('in replacing');
           console.log('fragment', fragment);
-          var olregex = /var\s*(.*)\s*=\s*(\(.*?\))\s*=>\s*(\{,)\s*return\s*(.+)(,\});/ig;
-          var newfragment = fragment.replace(olregex, 'var $1 = $2 => $4');
+          var olregex = /(.*)\s*=\s*(\(.*\))\s*=>\s*\{,\s*return\s*(.*);,\}/ig;
+          var newfragment = fragment.replace(olregex, 'var $1 = $2 => $3');
           console.log('replaced', newfragment);
           result = fragment = newfragment;
-          result = 'anon2 = (z, w) => return z + w';
+          // result = 'anon2 = (z, w) => return z + w';
         }
         if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
             result = sourceMap ? toSourceNodeWhenNeeded(result).replaceRight(/\s+$/, '') : fragment.replace(/\s+$/, '');
         }
 
-        console.log('result',result);
+        // console.log('result',result);
 
 
         return toSourceNodeWhenNeeded(result, stmt);
