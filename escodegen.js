@@ -940,14 +940,17 @@
     CodeGenerator.prototype.generateFunctionBody = function (node) {
         var result, expr;
         var oneliner = false;
-        // console.log(node);
-        // if (node.id === null) console.log('yay!');
+
 
         result = this.generateFunctionParams(node);
-        // console.log(result);
+
+        // ES6
+        // We're going to make anonymous functions arrow functions
+        // named functions have the name in the node.id
+        // anonymous functions have an empty node.id
+        // escodegen detects Arrow functions already, so we won't apply this change to arrow functions
+
         if (node.id === null && node.type !== 'ArrowFunctionExpression') result.push( ' =>');
-        // if (node.id === null && node.type !== 'ArrowFunctionExpression') console.log(JSON.stringify(node.body) + '\n');
-        // if (node.id === null && node.type !== 'ArrowFunctionExpression') console.log(JSON.stringify(node.body.body[0].type) + '\n');
         if (node.id === null
             && node.type !== 'ArrowFunctionExpression'
             && node.body.body[0].type === 'ReturnStatement') oneliner = true;
@@ -2076,7 +2079,7 @@
         FunctionExpression: function (expr, precedence, flags) {
             var result = [
                 generateAsyncPrefix(expr, true),
-                ' ' //for arrow functions WADE
+                '' //for arrow functions ES6
             ];
             if (expr.id) {
                 result.push(generateStarSuffix(expr) || noEmptySpace());
@@ -2504,7 +2507,6 @@
             oneliner = false;
 
         result = this[stmt.type](stmt, flags);
-        // console.log('result', result);
 
         // Attach comments
 
@@ -2512,48 +2514,38 @@
             result = addComments(stmt, result);
         }
 
-        // WADE
-        // TODO -- Delete
-        // console.log('result', result);
-        // console.log('2 -- ', result[2]);
-        // let newlines = (result[2] && (result[2].constructor === String)) ? (result[2].match(/\n/g) ? result[2].match(/\n/g).length : 0) : 'array';
-        // console.log('newlines', newlines);
-        // if (newlines < 3) result.push('one-liner');
-        // if (result[2] && (result[2].indexOf('return') > -1)) result.push('one-liner');
 
         fragment = toSourceNodeWhenNeeded(result);
 
-        // WADE
-        // TODO - Delete
-        // console.log('fragment',fragment);
+        // ES6 - trying to identify functions that can be shown on one line
+        // These will have a => in the first element of the array, a return on the second, and a close brace on the third
+        // Multi-line functions won't match this.
         fragment = fragment.split('\n');
-        // console.log('fragment-arr', fragment)
         if (fragment[0] && (fragment[0].indexOf('=>') > -1)) {
           if (fragment[2] && (fragment[2].indexOf('}') > -1)) {
             if (fragment[1] && (fragment[1].indexOf('return') > -1)) oneliner = true;
           }
         }
-        // if (fragment[0].indexOf('return') > -1) console.log('one-liner!');
 
-        // console.log(oneliner);
 
         fragment = fragment.toString();
         if (oneliner) {
-          // console.log('in replacing');
-          console.log('fragment', fragment);
-          var olregex = /(.*)\s*=\s*(\(.*\))\s*=>\s*\{,\s*return\s*(.*);,\}/ig;
+          // ES6
+          // If this is a one-line statement, run a fancy RegExp
+          // Really, all we do is strip out the parens and stuff
+          var olregex = /(\S*)\s*=\s*(\(.*\))\s*=>\s*\{,\s*return\s*(.*);,\}/ig;
           var newfragment = fragment.replace(olregex, '$1 = $2 => $3');
-          console.log('replaced', newfragment);
-          var nestedregex = /(.*)\{,\s*return\s*(.*);,\}(.*)/ig;
+
+          // If the function is in a callback, we need to have a slightly different RegExp
+          var nestedregex = /(\S*)\{,\s*return\s*(.*);,\}(.*)/ig;
           newfragment = newfragment.replace(nestedregex, '$1$2$3');
+          newfragment = newfragment.replace(/\(\s*\(/, '((');
           result = fragment = newfragment;
-          // result = 'anon2 = (z, w) => return z + w';
         }
         if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
             result = sourceMap ? toSourceNodeWhenNeeded(result).replaceRight(/\s+$/, '') : fragment.replace(/\s+$/, '');
         }
 
-        // console.log('result',result);
 
 
         return toSourceNodeWhenNeeded(result, stmt);

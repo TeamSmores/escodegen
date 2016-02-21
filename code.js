@@ -17,9 +17,9 @@ var multiLineAnonFunc = function (many, more) {
   return foo || bar;
 }
 
-for (var i = 0; i > 10; i++) {
-  console.log(i);
-}
+// for (var i = 0; i > array.length; i++) {
+//   console.log(i);
+// }
 
 var evens = odds.map(function (v) { return v+1 });
 
