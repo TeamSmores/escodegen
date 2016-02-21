@@ -1653,9 +1653,10 @@
             withIndent(function () {
                 result = ['for' + space + '('];
                 // start new stuff
+                var initVar = stmt.init.declarations[0].id.name;
                 var testValue;
                 if (stmt.test.right.object) {
-                  testValue = stmt.test.right.object.name.length;
+                  testValue = stmt.test.right.object.name[stmt.test.right.property.name];
                 }
                 if (stmt.test.right.value) {
                   testValue = stmt.test.right.value;
@@ -1668,7 +1669,11 @@
                   return checkBody(value.body.body[0]);
                 }
                 checkBody(stmt.body.body[0]);
-                if (stmt.init.declarations[0].init.value === 0 && bodyValue.arguments[0].object.name.length === testValue && stmt.update.operator === '++') {
+                var updateOperator = false;
+                if (initVar + '++' === that.generateExpression(stmt.update, Precedence.Sequence, E_TTT).replace(/\s/g,'') || initVar + '+=1' === that.generateExpression(stmt.update, Precedence.Sequence, E_TTT).replace(/\s/g,'')) {
+                  updateOperator = true;
+                }
+                if (stmt.init.declarations[0].init.value === 0 && bodyValue.arguments[0].object.name.length === testValue && updateOperator) {
                   result.push(stmt.init.kind + noEmptySpace() + stmt.init.declarations[0].id.name + noEmptySpace());
                   result = join(result, 'of');
                     result = [join(
@@ -1678,7 +1683,6 @@
                   return result;
                 }
                 //end new stuff
-                // console.log('TEST: ', stmt.test.right.);
                 if (stmt.init) {
                     if (stmt.init.type === Syntax.VariableDeclaration) {
                         result.push(that.generateStatement(stmt.init, S_FFFF));
