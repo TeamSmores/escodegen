@@ -2544,6 +2544,7 @@
           var nestedregex = /(\S*)\{,\s*return\s*(.*);,\}(.*)/ig;
           newfragment = newfragment.replace(nestedregex, '$1$2$3');
           newfragment = newfragment.replace(/\(\s*\(/, '((');
+          newfragment = newfragment.replace(/\s\s/, '');
           result = fragment = newfragment;
         }
         if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
